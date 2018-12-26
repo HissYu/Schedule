@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sechdule</title>
+    <link rel="stylesheet" href="css/index.css">
+    <script src="lib/vue.js"></script>
+</head>
+<body>
+    <div id="base">
+        <div class="action">
+            <input type="text" v-model="newTodo">
+            <button @click="pushSchedule">Add</button>
+        </div>
+        <ol class="todo-list">
+            <todo-item v-for='todo in todos' :todo='todo' :key='todo.id'></todo-item>
+        </ol>
+        <div class="footer">
+            <span>Doing:   {{doingNums}}    Done:   </span>
+        </div>
+    </div>
+</body>
+<script>
+Vue.component('todo-item',{
+    props:['todo'],
+    template:'<li class="todo-t"><span class="things" :data-doing="todo.doing">{{todo.todoThing}}<button>Done! </button></span></li>'
+})
+
+var base=new Vue({
+    el:'#base',
+    data:{
+        newTodo:'',
+        todos:[
+            {id:0,todoThing:"Finish this program",doing:true},
+            {id:1,todoThing:"Ask for a 10ve",doing:true}
+        ]
+    },
+    methods:{
+        pushSchedule:function(){
+
+        },
+        finishThing:function(){
+
+        }
+    },
+    computed:{
+        doingNums:function(){
+            return this.todos.length
+        }
+    }
+})
+
+</script>
+</html>

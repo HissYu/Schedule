@@ -24,7 +24,7 @@
 <script>
 Vue.component('todo-item',{
     props:['todo'],
-    template:'<li class="todo-t"><span class="things" :data-doing="todo.doing">{{todo.todoThing}}<button>Done! </button></span></li>'
+    template:'<li class="todo-t"><span :class="things">{{todo.todoThing}}<button>Done! </button></span></li>'
 })
 
 var base=new Vue({

@@ -10,34 +10,70 @@
 <body>
     <div id="base">
         <div class="action">
-            <input type="text" v-model="newTodo">
-            <button @click="pushSchedule">Add</button>
+            <input :class="{'text-danger':invalidInput}" type="text" v-model="newTodo">
+            <button @click="pushSchedule()" :disabled="invalidInput">Add</button>
         </div>
         <ol class="todo-list">
-            <todo-item v-for='todo in todos' :todo='todo' :key='todo.id'></todo-item>
+            <div v-if="todos.length==0">No Schedule</div>
+            <todo-item v-for='(todo,index) in todos' :todo='todo' :todos="todos" :key='index' :index='index'></todo-item>
         </ol>
         <div class="footer">
             <span>Doing:   {{doingNum}}    Done:   {{doneNum}}</span>
         </div>
     </div>
+
+    <template id="todo-item-template">
+        <li class="todo-t">
+            <span v-if="!todo.edit" type="text" class="things" v-text="todo.todoThing"></span>
+            <button v-if="!todo.edit" :disabled="!todo.doing" @click="finishThing()">Done! </button>
+            <button v-if="!todo.edit" @click="enableEdit()">EDIT</button>
+            <input type="text" v-if="todo.edit" v-model="tempThing">
+            <button v-if="todo.edit&&!todo.doing" @click="editThing('undone')">标记未完成</button>
+            <button v-if="todo.edit&&todo.doing" @click="editThing('done')">标记已完成</button>
+            <button v-if="todo.edit" @click="editThing('save')">保存</button>
+            <button v-if="todo.edit" @click="editThing('cancel')">取消</button>
+            <button v-if="todo.edit" @click="editThing('delete')">删除</button>
+        </li>
+    </template>
 </body>
 <script>
 Vue.component('todo-item',{
-    props:['todo'],
-    template:'<li class="todo-t"><input type="text" class="things" v-model="todo.todoThing"></input><button :disabled="!todo.doing" @click="finishThing()">Done! </button></li>',
+    props:['todo','todos','index'],
+    template:'#todo-item-template',
+    data:function() {
+        return{
+            tempThing:""
+        }
+    },
     methods:{
         finishThing:function(){
-            this.todo.doing=false;
+            this.todo.doing=false
+        },
+        enableEdit:function(){
+            this.tempThing=this.todo.todoThing
+            this.todo.edit=true
         },
         editThing:function(action){
             switch(action){
+                case 'done':
+                    this.todo.doing=false
+                    this.todo.edit=false
+                break
                 case 'undone':
+                    this.todo.doing=true
+                    this.todo.edit=false
                 break
                 case 'save':
+                    this.todo.todoThing=this.tempThing
+                    this.todo.edit=false
+                    this.todo.doing=!this.todo.doing
+                    this.todo.doing=!this.todo.doing
                 break
                 case 'cancel':
+                    this.todo.edit=false
                 break
                 case 'delete':
+                    this.todos.splice(this.index,1)
                 break
             }
         }
@@ -53,10 +89,11 @@ var base=new Vue({
     el:'#base',
     data:{
         newTodo:'',
+        invalidInput:false,
         todos:[
-            {id:0,todoThing:"Finish this program",doing:true,edit:false},
-            {id:1,todoThing:"Ask for a 10ve",doing:true,edit:false},
-            {id:2,todoThing:"do the summary assignment",doing:false,edit:false}
+            {todoThing:"Finish this program",doing:true,edit:false},
+            {todoThing:"Ask for a 10ve",doing:true,edit:false},
+            {todoThing:"do the summary assignment",doing:false,edit:false}
         ]
     },
     created:function(){
@@ -73,19 +110,33 @@ var base=new Vue({
     },
     methods:{
         pushSchedule:function(){
-
+            this.todos.push({
+                id : this.todos.length,
+                todoThing : this.newTodo,
+                doing : true,
+                edit : false
+            })
+            this.newTodo=""
         },
     },
     computed:{
         doingNum:function(){
             return this.todos.filter(function(el){
                 return el.doing===true
-            }).length
+            }).length||'0'
         },
         doneNum:function(){
             return this.todos.filter(function(el){
                 return el.doing===false
-            }).length
+            }).length||'0'
+        }
+    },
+    watch:{
+        newTodo:function(val){
+            var test=/^(\s|　)+$/
+            if(!val.search(test))
+                this.invalidInput=true
+            else this.invalidInput=false
         }
     }
 })

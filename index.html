@@ -17,14 +17,36 @@
             <todo-item v-for='todo in todos' :todo='todo' :key='todo.id'></todo-item>
         </ol>
         <div class="footer">
-            <span>Doing:   {{doingNums}}    Done:   </span>
+            <span>Doing:   {{doingNum}}    Done:   {{doneNum}}</span>
         </div>
     </div>
 </body>
 <script>
 Vue.component('todo-item',{
     props:['todo'],
-    template:'<li class="todo-t"><span :class="things">{{todo.todoThing}}<button>Done! </button></span></li>'
+    template:'<li class="todo-t"><input type="text" class="things" v-model="todo.todoThing"></input><button :disabled="!todo.doing" @click="finishThing()">Done! </button></li>',
+    methods:{
+        finishThing:function(){
+            this.todo.doing=false;
+        },
+        editThing:function(action){
+            switch(action){
+                case 'undone':
+                break
+                case 'save':
+                break
+                case 'cancel':
+                break
+                case 'delete':
+                break
+            }
+        }
+    }
+})
+
+Vue.component('edit-button',{
+    props:['isInEdit'],
+    template:''
 })
 
 var base=new Vue({
@@ -32,21 +54,38 @@ var base=new Vue({
     data:{
         newTodo:'',
         todos:[
-            {id:0,todoThing:"Finish this program",doing:true},
-            {id:1,todoThing:"Ask for a 10ve",doing:true}
+            {id:0,todoThing:"Finish this program",doing:true,edit:false},
+            {id:1,todoThing:"Ask for a 10ve",doing:true,edit:false},
+            {id:2,todoThing:"do the summary assignment",doing:false,edit:false}
         ]
+    },
+    created:function(){
+        localStorage.setItem('supportLocalStorage','true')
+        if(!localStorage.getItem('supportLocalStorage'))
+            alert('Your browser doesn\'t support LocalStorage, this site maynot run probably.\n你的浏览器不支持LocalStorage，此网站将无法正确运行。')
+        else localStorage.removeItem('supportLocalStorage')
+        var t
+        if(t=localStorage.getItem('YourSchedule'))
+            this.todos=JSON.parse(t)
+    },
+    updated:function(){
+        localStorage.setItem('YourSchedule',JSON.stringify(this.todos))
     },
     methods:{
         pushSchedule:function(){
 
         },
-        finishThing:function(){
-
-        }
     },
     computed:{
-        doingNums:function(){
-            return this.todos.length
+        doingNum:function(){
+            return this.todos.filter(function(el){
+                return el.doing===true
+            }).length
+        },
+        doneNum:function(){
+            return this.todos.filter(function(el){
+                return el.doing===false
+            }).length
         }
     }
 })
